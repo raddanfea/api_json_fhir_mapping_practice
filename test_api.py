@@ -44,5 +44,4 @@ if __name__ == '__main__':
     headers = {"Content-Type": "application/json"}
     payload = read_json_file(input_file)
     response = requests.post("http://127.0.0.1:3000/convert", json=payload, headers=headers)
-    print(response.text)
-    # send_test_request()
+    pprint.pprint(json.loads(response.json()))

@@ -1,7 +1,9 @@
+from starlette.responses import JSONResponse
 from uvicorn import run
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, HTTPException
 
+from ge_interview.conversion import convert_to_fhir
 from ge_interview.model import InputModel
 
 app = FastAPI()
@@ -22,7 +24,9 @@ app.add_middleware(
 
 @app.post("/convert")
 async def map_json(input_data: InputModel):
-    return bool(input_data)
+    new_dict = await convert_to_fhir(input_data.model_dump())
+    if not new_dict: raise HTTPException(status_code=400, detail="Couldn't parse input.")
+    return JSONResponse(content=new_dict)
 
 
 if __name__ == "__main__":
