@@ -16,8 +16,7 @@ def recursive_search(json_obj, target_key):
     elif isinstance(json_obj, list):
         for item in json_obj:
             results.extend(recursive_search(item, target_key))
-    else:
-        return list()
+
     return results
 
 
@@ -79,6 +78,9 @@ async def convert_to_fhir(data: dict):
 
         date_now = datetime.now().isoformat()
         observation.update({'dataFetched': date_now})
+
+        value = resource.get('valueString', False)
+        if value: observation.update({'measurementValue': value})
 
         if resource.get('id', None): observations_list.append(observation)
 

@@ -53,6 +53,7 @@ class Resource(BaseModel):
     issued: Optional[str] = None
     performer: Optional[List[Reference]] = None
     component: Optional[List[Component]] = None
+    valueString: Optional[str] = None
 
 
 class Link(BaseModel):
