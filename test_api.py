@@ -38,10 +38,12 @@ if __name__ == '__main__':
     # show_json_structure()
 
     # test the pydantic model
-    # input_pydantic = InputModel(**read_json_file(input_file))
+    input_pydantic = InputModel(**read_json_file(input_file))
+
 
     # send request
     headers = {"Content-Type": "application/json"}
     payload = read_json_file(input_file)
     response = requests.post("http://127.0.0.1:3000/convert", json=payload, headers=headers)
-    pprint.pprint(json.loads(response.json()))
+    if not response.status_code == 200: pprint.pprint(response.text)
+    else: pprint.pprint(json.loads(response.json()))

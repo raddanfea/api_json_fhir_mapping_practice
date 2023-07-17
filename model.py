@@ -19,21 +19,15 @@ class Code(BaseModel):
 
 
 class ValueQuantity(BaseModel):
-    value: Optional[float]
-    unit: str
-    system: str
-    code: str
+    value: Optional[float] = None
+    unit: Optional[str] = None
+    system: Optional[str] = None
+    code: Optional[str] = None
 
 
 class ValueCodeableConcept(BaseModel):
     coding: List[Coding]
     text: str
-
-
-class Component(BaseModel):
-    code: Optional[Code]
-    valueQuantity: Optional[ValueQuantity] = None
-    valueCodeableConcept: Optional[ValueCodeableConcept] = None
 
 
 class Reference(BaseModel):
@@ -52,7 +46,7 @@ class Resource(BaseModel):
     effectiveDateTime: Optional[str] = None
     issued: Optional[str] = None
     performer: Optional[List[Reference]] = None
-    component: Optional[List[Component]] = None
+    valueQuantity: Optional[ValueQuantity] = None
     valueCodeableConcept:  Optional[ValueCodeableConcept] = None
     valueString: Optional[str] = None
 
