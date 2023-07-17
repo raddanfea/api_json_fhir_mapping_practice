@@ -101,5 +101,4 @@ async def convert_to_fhir(data: dict):
             observation.update({'measurementUnit': each.get('unit', None)})
             observations_list.append(observation)
 
-    observations_list = [x for x in observations_list if x.get('measurementUnit')]
     return json.dumps(observations_list)
