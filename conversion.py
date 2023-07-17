@@ -60,16 +60,16 @@ async def convert_to_fhir(data: dict):
         # values
         observation.update({'observationId': resource.get('id', None)})
 
+        if not resource.get('id', None):
+            continue
+
         observation.update({'patientId': get_subject_id(subject)})
 
         observation.update({'performerId': get_performer_id(performer_list)})
 
         measurement_date = resource.get('effectiveDateTime', None)
+        if not measurement_date: measurement_date = resource.get('issued', None)
         observation.update({'measurementDate': measurement_date})
-
-        valueQuantity = recursive_search(entry, 'valueQuantity')
-        valueQuantity = [q for q in valueQuantity if q]
-        observation.update({'valueQuantity': valueQuantity})
 
         coding = recursive_search(entry, 'coding')
         # collapse and filter list
@@ -79,24 +79,27 @@ async def convert_to_fhir(data: dict):
         date_now = datetime.now().isoformat()
         observation.update({'dataFetched': date_now})
 
-        value = resource.get('valueString', False)
-        if value: observation.update({'measurementValue': value})
+        valueQuantity = recursive_search(entry, 'valueQuantity')
+        valueQuantity = [q for q in valueQuantity if q]
 
-        if resource.get('id', None): observations_list.append(observation)
+        if not valueQuantity:
 
-        if components_list and False:
-            for component in components_list:
-                codings_list = component.get('code', dict()).get('coding', list())
-                codings_list_filtered = [c for c in codings_list if c.get('system', False) == 'http://loinc.org']
-                values = component.get('valueQuantity', None)
-                if values is None: values = dict()
-                value = values.get('value', None)
-                unit = values.get('unit', None)
+            # value in valueString
+            value = resource.get('valueString', False)
+            observation.update({'measurementValue': value})
 
-                observation.update({'measurementCoding': codings_list_filtered})
-                observation.update({'measurementValue': value})
-                observation.update({'measurementUnit': unit})
+            #  value in valueCodableConcept
+            value = resource.get('valueCodeableConcept', False)
+            if value: observation.update({'measurementValue': value.get('text', None)})
 
-                if observation: observations_list.append(observation)
+            observation.update({'measurementUnit': None})
+            observations_list.append(observation)
+            continue
 
+        for each in valueQuantity:
+            observation.update({'measurementValue': each.get('value', None)})
+            observation.update({'measurementUnit': each.get('unit', None)})
+            observations_list.append(observation)
+
+    observations_list = [x for x in observations_list if x.get('measurementUnit')]
     return json.dumps(observations_list)

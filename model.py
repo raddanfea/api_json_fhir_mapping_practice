@@ -53,6 +53,7 @@ class Resource(BaseModel):
     issued: Optional[str] = None
     performer: Optional[List[Reference]] = None
     component: Optional[List[Component]] = None
+    valueCodeableConcept:  Optional[ValueCodeableConcept] = None
     valueString: Optional[str] = None
 
 
