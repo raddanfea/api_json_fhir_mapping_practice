@@ -10,7 +10,7 @@ output_file = 'files/output_observations.json'
 
 
 def read_json_file(path):
-    with open(path, "r") as json_file:
+    with open(path, "r", encoding="utf-8") as json_file:
         return json.load(json_file)
 
 
