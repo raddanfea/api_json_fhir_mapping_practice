@@ -40,6 +40,40 @@ def get_subject_id(subject):
     return subject_id
 
 
+def unit_conversion(observations_list):
+    conversion_factors = {
+        'K/µL': {'new_unit': '10^6/µL', 'conversion_factor': 1000},
+        'mg/dL': {'new_unit': 'g/dL', 'conversion_factor': 0.01},
+        '10^3/mL': {'new_unit': '10^6/µL', 'conversion_factor': 1000000},
+        'cm': {'new_unit': 'm', 'conversion_factor': 0.01},
+        'g/dL': {'new_unit': 'g/dL', 'conversion_factor': 1},
+        'lb': {'new_unit': 'kg', 'conversion_factor': 0.453592},
+        # For all other units, we will keep the same unit and value without conversion
+        'g/dl': {'new_unit': 'g/dL', 'conversion_factor': 1},
+        '%': {'new_unit': '%', 'conversion_factor': 1},
+        'Cel': {'new_unit': 'Cel', 'conversion_factor': 1},
+        'kg': {'new_unit': 'kg', 'conversion_factor': 1},
+        '/min': {'new_unit': '/min', 'conversion_factor': 1},
+        '10^6/µL': {'new_unit': '10^6/µL', 'conversion_factor': 1},
+        'm': {'new_unit': 'm', 'conversion_factor': 1},
+        None: {'new_unit': None, 'conversion_factor': 1},
+    }
+
+    for observation in observations_list:
+        unit = observation["measurementUnit"]
+        value = observation["measurementValue"]
+        conversion_info = conversion_factors.get(unit, None)
+
+        if conversion_info is not None:
+            new_unit = conversion_info.get('new_unit', None)
+            conversion_factor = conversion_info.get('conversion_factor', None)
+
+            if new_unit and value is not None:
+                converted_value = value * conversion_factor
+                observation["measurementUnit"] = new_unit
+                observation["measurementValue"] = converted_value
+
+
 async def convert_to_fhir(data: dict):
     observations_list = list()
 
@@ -100,5 +134,7 @@ async def convert_to_fhir(data: dict):
             observation.update({'measurementValue': each.get('value', None)})
             observation.update({'measurementUnit': each.get('unit', None)})
             observations_list.append(observation)
+
+    unit_conversion(observations_list)
 
     return json.dumps(observations_list)

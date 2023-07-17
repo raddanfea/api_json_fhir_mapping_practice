@@ -15,7 +15,14 @@ def read_json_file(path):
 
 
 def send_test_request():
-    input_data = read_json_file(input_file)
+    headers = {"Content-Type": "application/json"}
+    payload = read_json_file(input_file)
+    response = requests.post("http://127.0.0.1:3000/convert", json=payload, headers=headers)
+    if not response.status_code == 200:
+        pprint.pprint(response.text)
+    else:
+        pprint.pprint(json.loads(response.json()))
+    return response
 
 
 def show_json_structure():
@@ -28,22 +35,27 @@ def show_json_structure():
             return type(obj).__name__
 
     file = read_json_file(input_file)
-    print([(key, type(value)) for key, value in file.items()])
     input_data = remove_values(file)
     pprint.pprint(input_data)
 
 
+def check_units(resp):
+    units = set()
+    for each in json.loads(resp.json()):
+        units.add(each.get('measurementUnit', 'MISSING'))
+
+    print("Units:", *units)
+
+
 if __name__ == '__main__':
     # check out structure of the json file
-    # show_json_structure()
+    show_json_structure()
 
     # test the pydantic model
-    input_pydantic = InputModel(**read_json_file(input_file))
+    InputModel(**read_json_file(input_file))
 
+    # test
+    response = send_test_request()
 
-    # send request
-    headers = {"Content-Type": "application/json"}
-    payload = read_json_file(input_file)
-    response = requests.post("http://127.0.0.1:3000/convert", json=payload, headers=headers)
-    if not response.status_code == 200: pprint.pprint(response.text)
-    else: pprint.pprint(json.loads(response.json()))
+    # check output units
+    check_units(response)
